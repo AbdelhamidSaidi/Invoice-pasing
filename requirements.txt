@@ -1,1 +1,6 @@
+
 rapidfuzz>=2.15.0
+pdfplumber>=0.7.6
+flask>=2.0.0
+streamlit>=1.22.0
+

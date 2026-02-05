@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Invoice Extractor</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Invoice Extractor</h1>
+
+      <form id="upload-form">
+        <label class="file-label">
+          Choose PDF
+          <input id="file-input" type="file" accept="application/pdf" />
+        </label>
+
+        <button id="upload-btn" type="submit">Upload & Extract</button>
+      </form>
+
+      <section id="status" class="hidden"></section>
+
+      <section id="result" class="hidden">
+        <h2>Extracted Invoice JSON</h2>
+        <pre id="json-output">{ }</pre>
+        <a id="download-link" class="btn" download="invoice.json">Download JSON</a>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
