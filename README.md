@@ -1,6 +1,13 @@
-# Invoice parsing notebook — README
+# Invoice parsing (PDF → invoice_json)
 
-This file explains the logic and structure of the notebook `data from pdf.ipynb` and details how each extraction works.
+This project extracts key fields from PDF invoices and returns a structured JSON object (`invoice_json`).
+
+It includes:
+
+- A Jupyter notebook: `data from pdf.ipynb`
+- A small HTTP API (Flask): `app.py`
+- A static frontend (HTML/CSS/JS): `static/`
+- A French LaTeX academic-style report: `report/`
 
 ## Overview
 
@@ -71,7 +78,12 @@ All extractions are implemented using regular expressions with safety checks to 
 ## How to run
 
 1. Open the notebook `data from pdf.ipynb` in your Jupyter environment or VS Code (Notebook view).
-2. Ensure `pdfplumber` is installed in the active environment: `pip install pdfplumber`.
+2. Ensure dependencies are installed in the active environment (recommended):
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
 3. Update `loc_1` to point at the PDF you want to parse.
 4. Run the first cells in order. The combined extraction cell prints a JSON string with the parsed values.
 
@@ -90,6 +102,83 @@ The notebook prints a single JSON object, for example:
 - Normalize currency (remove commas) and convert totals to numeric `float` or `Decimal` for downstream calculations.
 - Add logging and a `verbose` flag rather than printing directly.
 - Add a small CLI or function wrapper so the same logic can be used in batch-processing scripts.
+
+## Application Web (API + Frontend)
+
+This repository also contains a small web app:
+
+- API: `app.py` (Flask)
+- Frontend: `static/index.html` (HTML/CSS/JS)
+
+Run the API:
+
+```powershell
+python -m pip install -r requirements.txt
+python app.py
+```
+
+Open the frontend:
+
+- http://127.0.0.1:5000/static/index.html
+
+### API usage (without the frontend)
+
+```powershell
+curl -F "file=@invoice1-word-example.pdf" http://127.0.0.1:5000/extract
+```
+
+If you serve `static/` from another server (different port), the API sends permissive CORS headers for development.
+
+## Rapport LaTeX (FR)
+
+The LaTeX report is in the `report/` folder.
+
+## Report (Markdown)
+
+The main project report (French, academic style) is available as Markdown:
+
+- `REPORT.md`
+
+### Prerequisites (Windows)
+
+You need a LaTeX distribution installed (otherwise commands like `pdflatex` / `latexmk` are not found):
+
+- Option A: MiKTeX (recommended on Windows)
+- Option B: TeX Live
+
+After installing, close and reopen PowerShell so the new PATH is loaded.
+
+#### Install MiKTeX with winget (optional)
+
+```powershell
+winget install --id MiKTeX.MiKTeX --source winget
+```
+
+### Compile (recommended: latexmk)
+
+If you have TeX Live / MiKTeX + `latexmk` installed:
+
+```powershell
+cd report
+latexmk -pdf -interaction=nonstopmode -synctex=1 main.tex
+```
+
+### Compile (helper script)
+
+```powershell
+cd report
+./compile.ps1
+```
+
+### Compile (manual)
+
+```powershell
+cd report
+pdflatex -interaction=nonstopmode main.tex
+biber main
+pdflatex -interaction=nonstopmode main.tex
+pdflatex -interaction=nonstopmode main.tex
+```
 
 ## Contact
 
