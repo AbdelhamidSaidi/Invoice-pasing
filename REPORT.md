@@ -294,6 +294,16 @@ Le système comprend :
 - **Backend** : API Flask (`app.py`) exposant `POST /extract`.
 - **Frontend** : fichiers statiques `static/index.html`, `static/style.css`, `static/script.js`.
 
+En plus, une persistance légère a été ajoutée :
+
+- **Stockage** : base de données SQLite locale (`receipts.db`) pour conserver l'historique des extractions. Chaque extraction sauvegarde un enregistrement `Receipt` (fournisseur, numéro, date, sous-total, taxe, total, nom de fichier, horodatage).
+- **Endpoints supplémentaires** :
+  - `GET /receipts` — liste des reçus enregistrés
+  - `GET /receipts/<id>` — reçoit un reçu unique
+  - `DELETE /receipts/<id>` — supprime un reçu
+
+Le frontend inclut maintenant un onglet "My Receipts" permettant de parcourir l'historique local, supprimer des éléments et afficher un tableau récapitulatif (statistiques simples : nombre, somme totale, somme taxes, moyenne, somme des sous-totaux).
+
 Le navigateur envoie le PDF à l’API et affiche `invoice_json`.
 
 ## 4.2 Justification du découplage
@@ -348,6 +358,17 @@ Le champ `supplier` est obtenu via la localisation fuzzy sur des mots-clés comm
 
 Le résultat n’est pas un “nom normalisé” parfait ; il s’agit de la meilleure ligne candidate (utile pour extraction/contrôle).
 
+### 5.1.4 Persistance et API de gestion
+
+Le service sauvegarde désormais chaque extraction dans une base SQLite locale (`receipts.db`) via un petit modèle `Receipt`. L’enregistrement contient les champs extraits (supplier, invoice_number, invoice_date, subtotal, tax, total) ainsi que le `filename` et un horodatage `uploaded_at`.
+
+Cette persistance permet :
+
+- de conserver un historique local des factures traitées ;
+- d’exposer une page d’interface qui affiche l’historique (`My Receipts`) ;
+- d’offrir des actions de gestion via l’API (`GET /receipts`, `GET /receipts/<id>`, `DELETE /receipts/<id>`).
+
+L’implantation choisit SQLite pour sa simplicité (aucune configuration serveur requise) et pour faciliter les démonstrations et tests locaux.
 ### 5.1.4 Extraction des montants et autres champs
 
 Les fonctions d’extraction :

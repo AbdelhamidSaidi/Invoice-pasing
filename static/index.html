@@ -7,25 +7,53 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <nav class="nav-tabs">
+      <button id="tab-upload" class="tab-btn active" onclick="showTab('upload')">Upload Invoice</button>
+      <button id="tab-receipts" class="tab-btn" onclick="showTab('receipts')">My Receipts</button>
+    </nav>
+
     <main class="container">
-      <h1>Invoice Extractor</h1>
+      <!-- Upload Tab -->
+      <div id="upload-tab" class="tab-content active">
+        <h1>Invoice Extractor</h1>
 
-      <form id="upload-form">
-        <label class="file-label">
-          Choose PDF
-          <input id="file-input" type="file" accept="application/pdf" />
-        </label>
+        <form id="upload-form">
+          <label class="file-label">
+            Choose PDF
+            <input id="file-input" type="file" accept="application/pdf" />
+          </label>
 
-        <button id="upload-btn" type="submit">Upload & Extract</button>
-      </form>
+          <button id="upload-btn" type="submit">Upload & Extract</button>
+        </form>
 
-      <section id="status" class="hidden"></section>
+        <section id="status" class="hidden"></section>
 
-      <section id="result" class="hidden">
-        <h2>Extracted Invoice JSON</h2>
-        <pre id="json-output">{ }</pre>
-        <a id="download-link" class="btn" download="invoice.json">Download JSON</a>
-      </section>
+        <section id="result" class="hidden">
+          <h2>Extracted Invoice JSON</h2>
+          <pre id="json-output">{ }</pre>
+          <a id="download-link" class="btn" download="invoice.json">Download JSON</a>
+        </section>
+      </div>
+
+      <!-- My Receipts Tab -->
+      <div id="receipts-tab" class="tab-content">
+        <h1>My Receipts</h1>
+        <button id="refresh-btn" class="btn" onclick="loadReceipts()">Refresh</button>
+        
+        <section id="receipts-status" class="hidden"></section>
+
+        <!-- Summary / Resume Table -->
+        <section id="receipts-summary" class="receipts-summary hidden">
+          <h2>Summary</h2>
+          <div id="summary-table" class="summary-table">
+            <!-- Filled dynamically -->
+          </div>
+        </section>
+        
+        <section id="receipts-list">
+          <p class="loading">Loading receipts...</p>
+        </section>
+      </div>
     </main>
 
     <script src="script.js"></script>

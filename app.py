@@ -4,9 +4,21 @@ from typing import Optional
 
 import pdfplumber
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from rapidfuzz import process, fuzz
 
+from models import db, Receipt
+
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///receipts.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+CORS(app)
+
+# Create tables
+with app.app_context():
+    db.create_all()
 
 
 def normalize(s: str) -> str:
@@ -123,8 +135,58 @@ def extract():
         text = "\n".join(pages)
 
         invoice_json = extract_invoice_json(text)
-        return jsonify({"invoice_json": invoice_json})
+        
+        # Save to database
+        receipt = Receipt(
+            supplier=invoice_json.get('supplier'),
+            invoice_number=invoice_json.get('invoice_number'),
+            invoice_date=invoice_json.get('invoice_date'),
+            subtotal=invoice_json.get('subtotal'),
+            tax=invoice_json.get('tax'),
+            total=invoice_json.get('total'),
+            filename=f.filename
+        )
+        db.session.add(receipt)
+        db.session.commit()
+        
+        return jsonify({
+            "invoice_json": invoice_json,
+            "receipt_id": receipt.id
+        })
     except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/receipts", methods=["GET"])
+def get_receipts():
+    try:
+        receipts = Receipt.query.order_by(Receipt.uploaded_at.desc()).all()
+        return jsonify({
+            "receipts": [receipt.to_dict() for receipt in receipts]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/receipts/<int:receipt_id>", methods=["GET"])
+def get_receipt(receipt_id):
+    try:
+        receipt = Receipt.query.get_or_404(receipt_id)
+        return jsonify(receipt.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/receipts/<int:receipt_id>", methods=["DELETE"])
+def delete_receipt(receipt_id):
+    try:
+        receipt = Receipt.query.get_or_404(receipt_id)
+        db.session.delete(receipt)
+        db.session.commit()
+        return jsonify({"message": "Receipt deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
 
@@ -132,7 +194,7 @@ def extract():
 def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
-    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS,DELETE"
     return response
 
 

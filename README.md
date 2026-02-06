@@ -1,4 +1,4 @@
-# Invoice parsing (PDF → invoice_json)
+# Invoice parsing (PDF -> invoice_json)
 
 This project extracts key fields from PDF invoices and returns a structured JSON object (`invoice_json`).
 
@@ -7,7 +7,8 @@ It includes:
 - A Jupyter notebook: `data from pdf.ipynb`
 - A small HTTP API (Flask): `app.py`
 - A static frontend (HTML/CSS/JS): `static/`
-- A French LaTeX academic-style report: `report/`
+- A French MarkDown academic-style report: `report/`
+ - Optional persistent storage: SQLite database `receipts.db` (saved automatically when invoices are uploaded)
 
 ## Overview
 
@@ -110,6 +111,8 @@ This repository also contains a small web app:
 - API: `app.py` (Flask)
 - Frontend: `static/index.html` (HTML/CSS/JS)
 
+The web UI includes a second tab "My Receipts" where previously-extracted invoices are listed from the local database and basic summary statistics are shown.
+
 Run the API:
 
 ```powershell
@@ -120,6 +123,13 @@ python app.py
 Open the frontend:
 
 - http://127.0.0.1:5000/static/index.html
+
+Notes:
+- On first run the application will create an SQLite database file `receipts.db` in the project root. This file is ignored by git via `.gitignore`.
+- The API exposes additional endpoints to manage stored receipts:
+  - `GET /receipts` — list saved receipts (used by the "My Receipts" UI)
+  - `GET /receipts/<id>` — retrieve a single receipt
+  - `DELETE /receipts/<id>` — delete a receipt
 
 ### API usage (without the frontend)
 
